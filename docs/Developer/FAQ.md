@@ -1,6 +1,6 @@
 # FAQ
 ## Hardfork Version 10: Bulletproofs
-### Mining Command `get_block_template` Updates
+### `get_block_template` Updates
 Due to batching of Governance rewards the calculation of rewards has been updated in Loki. As a side effect of this, in the `get_block_template` json response, `expected_reward` now returns only the miner reward instead of the entire block reward.
 
 For example, pre-hardfork 9, if the block reward was 100, `expected_reward` returned 100, even though ~50% of the reward was sent to the service node. Post Bulletproofs hardfork, `expected_reward` now returns 50, which is the exact amount the miner would receive.
@@ -114,7 +114,7 @@ And `get_block`
   ...
 ```
 
-The `expected_reward` is the same amount as the first vout amount in `get_block` which is the miner output (the 2nd being the Service Node Output). In summary, the `expected_reward` returned by `get_block_template` is exactly the reward the miner will receive.
+The `expected_reward` is the same amount as the 1st vout amount in `get_block` which is the miner output (the 2nd being the Service Node Output). In summary, the `expected_reward` returned by `get_block_template` is exactly the reward the miner will receive.
 
 ### Extracting Reward Amounts from Block Outputs
 In the Bulletproofs hardfork, batching of Governance rewards was introduced and removes the governance output from most miner transactions. This means, for most blocks the outputs will only include the Miner reward and the Service Node reward.
