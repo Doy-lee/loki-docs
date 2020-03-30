@@ -108,18 +108,27 @@ LNS records can be updated by getting the owner of the record to generate a sign
 
 The following fields can be updated in the record
 
-- `Name`
 - `Value`
 - `Owner`
 - `Backup Owner`
 
-Depending on the fields chosen to update, they must be copied into a buffer and also the TXID that last updated the record (which can be retrieved by querying the mapping). In summary the buffer to hash is as follows,
+- Copy the fields to update into a buffer
+- Copy the TXID into the buffer that last updated the record (which can be retrieved by querying the mapping).
+- Hash the buffer with blake2b with the following parameters
+    - Key Length: 0 bytes
+    - Hash Length: 32 bytes
+
+- Sign the hashed buffer
+    - If the owner is a wallet address, it must be signed with the owner's wallet secret spend key.
+    - If the owner is a ed25519 key, it must be signed with the owner's ed25519 secret key.
 
 ```
-Buffer[] = {*binary_value, *owner, *backup_owner, prev_txid}
-*If value is specified, copy the value to the buffer, otherwise skip.
+    // *If value is specified, copy the value to the buffer, otherwise skip.
+    buffer[] = {*binary_value, *owner, *backup_owner, prev_txid}
+    hash32 = Blake2B(buffer, key=0)
+
+    if (monero)
+        signature = generate_signature(hash32, spend_pkey, spend_skey)
+    else
+        signature = ed25519_signature(hash32, ed25519_skey)
 ```
-
-The buffer is then hashed with Libsodium’s crypto_generichash with a null key into a 32 byte hash.
-
-
