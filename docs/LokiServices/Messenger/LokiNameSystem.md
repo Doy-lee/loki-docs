@@ -71,11 +71,11 @@ Of which, `name_hashed` and `encrypted_value` use some form of encryption or dec
 
 ### `name_hashed`
 
-- Human readable name is hashed with blake2b with the following parameters
+- Human readable name is hashed with `blake2b` with the following parameters
     - Key Length: 0 bytes
     - Hash Length: 32 bytes
 
-- Name hash converted to base64 for storage into the sqlite3 database (this provides optimal lexicographic lookup as a key).
+- Name hash converted to base64 for storage into the `sqlite3` database (this provides optimal lexicographic lookup as a key).
 
 ```
     hash32 = Blake2B(name, key=0)
@@ -83,19 +83,19 @@ Of which, `name_hashed` and `encrypted_value` use some form of encryption or dec
 ```
 
 ### `encrypted_value`
-- Generate the secret key for decryption/encryption using the unhashed name with Argon2ID v1.3 and the following parameters as of Valiant Vidar v7.1.X
+- Generate the secret key for decryption/encryption using the unhashed name with `Argon2ID v1.3` and the following parameters as of Valiant Vidar v7.1.X
     - Iterations: 3
     - Memory: 268\_435\_456 bytes
     - Salt Length: 0 bytes
     - Key Length: 32 bytes
 
-- Decrypt/encrypt the value represented in binary with XSalsa20Poly1305 and the following parameters as of Valiant Vidar v7.1.X
+- Decrypt/encrypt the value represented in binary with `XSalsa20Poly1305` and the following parameters as of Valiant Vidar v7.1.X
     - Nonce: 0 bytes
 
 ```
     key32 = Argon2ID(iterations=3, memory=268435436, salt=0)
-    encrypted_value = XSalsa20Poly1305(value, key32, nonce=0)
-    decrypted_value = XSalsa20Poly1305(encrypted_value, key32, nonce=0)
+    encrypted_value = XSalsa20Poly1305Encrypt(value, key32, nonce=0)
+    decrypted_value = XSalsa20Poly1305Decrypt(encrypted_value, key32, nonce=0)
 ```
 
 ### Owners
@@ -107,20 +107,21 @@ By default, the wallet is configured to assign itself as the owner of the mappin
 LNS records can be updated by getting the owner of the record to generate a signature that authorises the protocol to update fields in the record.
 
 The following fields can be updated in the record
-
-- `Value`
-- `Owner`
-- `Backup Owner`
+```
+Value
+Owner
+Backup Owner
+```
 
 - Copy the fields to update into a buffer
 - Copy the TXID into the buffer that last updated the record (which can be retrieved by querying the mapping).
-- Hash the buffer with blake2b with the following parameters
+- Hash the buffer with `blake2b` with the following parameters
     - Key Length: 0 bytes
     - Hash Length: 32 bytes
 
 - Sign the hashed buffer
-    - If the owner is a wallet address, it must be signed with the owner's wallet secret spend key.
-    - If the owner is a ed25519 key, it must be signed with the owner's ed25519 secret key.
+    - If the current owner (or backup owner) is a wallet address, it must be signed with the current owner's (or backup owner's) wallet secret spend key.
+    - If the current owner (or backup owner) is a ed25519 key, it must be signed with the current owner's (or backup owner's) ed25519 secret key.
 
 ```
     // *If value is specified, copy the value to the buffer, otherwise skip.
